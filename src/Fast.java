@@ -43,6 +43,7 @@ public class Fast {
    * @param args
    */
     public static void main(String[] args) {
+        System.out.println("** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **");
         String filename = args[0];
         
         Point[] myPoints = Fast.readInputFile(filename);
@@ -73,51 +74,50 @@ public class Fast {
             // Look for length 4 sub-arrays of sortedPoints with
             // the same slope.
             double targetSlope = Double.NEGATIVE_INFINITY;
-            int numberWithSameSlope = -1;
+            int potentialLineSegmentIndex = 0;
             
             // Set up a potential line segment. It will always start
             // with curPoint.
             Point[] potentialLineSegment = new Point[numberOfPoints];
-            // potentialLineSegment[0] = curPoint;
+            potentialLineSegment[potentialLineSegmentIndex] = curPoint;
+            potentialLineSegmentIndex = potentialLineSegmentIndex + 1;
             
             for (int j = 0; j < numberOfPoints; ++j) {
                 Point pointToCheck = sortedPoints[j];
                 double curSlope = curPoint.slopeTo(pointToCheck);
 
-                System.out.println(String.format("slope is %f", curSlope));
-                if (curSlope == targetSlope) {
-                    System.out.println("found a slope match");
-                    // We have a match, so increment the counter.
-                    numberWithSameSlope = numberWithSameSlope + 1;
-                    potentialLineSegment[numberWithSameSlope] = pointToCheck;
-
-                } else {
-                    // Slopes don't match. If numberWithSameSlope is larger 
-                    // than 3 we have found a line. Print it out.
-                    if (numberWithSameSlope >= 3) {
+                if (curSlope != targetSlope) {
+                    System.out.println(String.format("curSlope %f <> targetSlope %f",  curSlope, targetSlope));
+                    System.out.println(String.format("numberwithSameSlope: %d", potentialLineSegmentIndex));
+                    // The slopes do not match. So, we have to reset our 
+                    // potential line segment. But before we do that, see if
+                    // we have at least 3 points in the current line segment.
+                    if (potentialLineSegmentIndex >= 3) {
                         System.out.println("slope change with at least 4 collinear");
-                        // Copy the points that are collinear into a new
-                        // array so we can sort them lexicographically.
-                        Point[] lineSegment = new Point[numberWithSameSlope];
-                        for (int k = 0; k < numberWithSameSlope; ++k){
+                        // There are at least 4 points.
+                        Point[] lineSegment = new Point[potentialLineSegmentIndex + 1];
+                        for (int k = 0; k < potentialLineSegmentIndex; ++k){
                             lineSegment[k] = potentialLineSegment[k];
                         }
                         Arrays.sort(lineSegment, curPoint.SLOPE_ORDER);
-                        for (int k = 0; k < numberWithSameSlope - 1; ++k){
-                            System.out.print(lineSegment[k].toString());
-                            System.out.print(" -> ");
-                        }
-                        System.out.print(lineSegment[numberWithSameSlope].toString());
-                    }
-                    // Reset targetSlope
-                    targetSlope = curSlope;
-                    System.out.println(String.format("resetting target slope to %f", targetSlope));
 
+                        Fast.printLineSegment(lineSegment); 
+                    }
+                    
+                    // We need to reset our potential line segment.
+                    potentialLineSegmentIndex = 0;
+                    potentialLineSegment[potentialLineSegmentIndex] = curPoint;
+                    potentialLineSegmentIndex = potentialLineSegmentIndex + 1;
+                    
+                    targetSlope = curSlope;
+                } else {
+                    // The slopes match.
+                    System.out.println(String.format("found a slope match for targetSlope %f", targetSlope));
+                    potentialLineSegment[potentialLineSegmentIndex] = pointToCheck;
+                    potentialLineSegmentIndex = potentialLineSegmentIndex + 1;
                 }
             }
-            
         }
-        
 
     }
 
